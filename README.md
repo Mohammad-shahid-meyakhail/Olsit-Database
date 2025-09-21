@@ -40,7 +40,6 @@ The dataset includes the following tables:
 
 ## 📷 Screenshot (Placeholder)
 ![Analytics Screenshot](1.png)  
-*(Replace with your own screenshot later)*
 
 ---
 
