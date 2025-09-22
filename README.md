@@ -20,7 +20,6 @@ The dataset includes the following tables:
 - `customers`
 - `orders`
 - `order_items`
-- `order_reviews`
 - `payments`
 - `products`
 - `sellers`
