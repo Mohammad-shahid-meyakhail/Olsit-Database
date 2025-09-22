@@ -8,7 +8,7 @@ My role is to explore sales, customer, and delivery data to generate insights fo
 ---
 
 ## 📊 Project Overview
-This project analyzes Olist’s e-commerce dataset, which contains **9 related tables** and millions of rows.  
+This project analyzes Olist’s e-commerce dataset, which contains **8 related tables** and millions of rows.  
 The data is stored in **PostgreSQL**, and we use **Python + Pandas + SQLAlchemy** for analysis.  
 Future steps will include building **visualizations** using Apache Superset.
 
