@@ -22,7 +22,7 @@ try:
     existing_tables = get_existing_tables(cur)
     print(f"📂 Found {len(existing_tables)} tables in DB: {existing_tables}\n")
 
-    # Read SQL file
+    # Read SQL filepython3 -m pip install psycopg2-binary
     with open("analysis_queries.sql", "r") as f:
         sql = f.read()
 
