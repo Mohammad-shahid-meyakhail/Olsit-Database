@@ -5,24 +5,19 @@ import psycopg2
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 from openpyxl.formatting.rule import ColorScaleRule
+import plotly.express as px   # ✅ Plotly for time slider
 
 # -----------------------------
 # Database connection
 # -----------------------------
-# Database configuration
 DB_CONFIG = {
-    "dbname": "olist_db",   # ✅ correct name from pgAdmin
+    "dbname": "olist_db",
     "user": "postgres",
     "password": "99113344",
     "host": "localhost",
     "port": 5432,
 }
 
-
-
-# -----------------------------
-# Helpers
-# -----------------------------
 def get_connection():
     return psycopg2.connect(**DB_CONFIG)
 
@@ -30,6 +25,9 @@ def fetch_dataframe(query):
     with get_connection() as conn:
         return pd.read_sql_query(query, conn)
 
+# -----------------------------
+# Matplotlib charts
+# -----------------------------
 def save_chart(df, chart_type, filename, title, xlabel=None, ylabel=None, x=None, y=None):
     plt.figure(figsize=(8, 6))
     if chart_type == "pie":
@@ -43,7 +41,6 @@ def save_chart(df, chart_type, filename, title, xlabel=None, ylabel=None, x=None
     elif chart_type == "hist":
         df[y].plot.hist(bins=20)
     elif chart_type == "scatter":
-        # convert timedelta column (if exists) into numeric days
         if pd.api.types.is_timedelta64_dtype(df[x]):
             df[x] = df[x].dt.days
         df.plot.scatter(x=x, y=y)
@@ -59,6 +56,9 @@ def save_chart(df, chart_type, filename, title, xlabel=None, ylabel=None, x=None
     plt.close()
     print(f"✅ Saved {chart_type} chart as {path} (rows: {len(df)}) → {title}")
 
+# -----------------------------
+# Excel export
+# -----------------------------
 def export_to_excel(dfs, filename):
     os.makedirs("exports", exist_ok=True)
     path = f"exports/{filename}"
@@ -67,18 +67,13 @@ def export_to_excel(dfs, filename):
         for sheet, df in dfs.items():
             df.to_excel(writer, sheet_name=sheet, index=False)
 
-    # Apply formatting
     wb = load_workbook(path)
     for sheet in wb.sheetnames:
         ws = wb[sheet]
 
-        # Freeze header
         ws.freeze_panes = "B2"
-
-        # Filters
         ws.auto_filter.ref = ws.dimensions
 
-        # Gradient fill (first numeric column only for demo)
         for col in ws.iter_cols(min_row=2, max_row=ws.max_row):
             if all(isinstance(c.value, (int, float)) for c in col if c.value is not None):
                 col_letter = col[0].column_letter
@@ -96,7 +91,7 @@ def export_to_excel(dfs, filename):
 # Main
 # -----------------------------
 def main():
-    # Queries (with JOINs)
+    # Queries
     queries = {
         "pie": """
             SELECT p.payment_type, COUNT(*) AS order_count
@@ -127,9 +122,7 @@ def main():
             GROUP BY month
             ORDER BY month;
         """,
-        "hist": """
-            SELECT price FROM order_items;
-        """,
+        "hist": "SELECT price FROM order_items;",
         "scatter": """
             SELECT (o.order_delivered_customer_date - o.order_purchase_timestamp) AS shipping_days,
                    oi.price
@@ -167,6 +160,24 @@ def main():
         "Prices": df5,
         "Shipping_vs_Price": df6
     }, "analytics_results.xlsx")
+
+    # -----------------------------
+    # ✅ Plotly Time Slider
+    # -----------------------------
+    print("\n🎬 Opening interactive Plotly chart with time slider...")
+    df_time = df4.copy()
+    df_time["year"] = df_time["month"].dt.year
+    df_time["month_name"] = df_time["month"].dt.strftime("%b %Y")
+
+    fig = px.bar(
+        df_time,
+        x="month_name",
+        y="total_orders",
+        color="year",
+        animation_frame="year",
+        title="Monthly Orders with Time Slider (Interactive)"
+    )
+    fig.show()
 
 if __name__ == "__main__":
     main()
