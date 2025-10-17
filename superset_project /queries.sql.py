@@ -11,7 +11,7 @@ RIGHT JOIN product_category_name_translation pc
   ON pr.product_category_name = pc.product_category_name
 GROUP BY pc.product_category_name;
 
--- 3. Horizontal bar chart: Sellers and their total sales–
+-- 3. Horizontal bar chart: Sellers and their total sales
 SELECT s.seller_id, SUM(oi.price) AS total_sales
 FROM order_items oi
 LEFT JOIN sellers s ON oi.seller_id = s.seller_id
